@@ -50,6 +50,27 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref StudyAwsInternetGateway
 
+  # SecurityGroup
+  StudyAwsEc2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref StudyAwsVPC
+      GroupDescription: This Security Group is for my studying of AWS
 
+  StudyAwsRdsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref StudyAwsVPC
+      GroupDescription: rds
+
+  # RDS定義
+  StudyAwsRds:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: study-aws-lesson
+      Port: 3306
+      DBInstanceClass: db.t2.micro
+      AvailabilityZone: ap-northeast-1a
+      VPCSecurityGroups: !Ref StudyAwsRdsSecurityGroup
 
 
