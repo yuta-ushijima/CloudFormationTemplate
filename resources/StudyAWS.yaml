@@ -1,7 +1,7 @@
 # AWSテンプレートのバージョン。存在する唯一のバージョンが下記なので実質固定。
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 # テンプレートの説明。実行時に表示されるので記載がベター。
-Description: 'AWS-Study Template'
+Description: AWS-Study Template
 # リソースの定義
 Resources:
   # VPC定義
@@ -11,6 +11,23 @@ Resources:
       CidrBlock: 10.0.0.0/24
       EnableDnsHostnames: true
       EnableDnsSupport: true
+
+  # EC2Instance定義
+  StudyAwsEC2Instace:
+    Type: AWS::EC2::Instance
+    Properties:
+      SubnetId: !Ref StudyAwsSubnetAZ1
+      InstanceType: t2.micro
+      AvailabilityZone: ap-northeast-1a
+      ImageId: ami-0d7ed3ddb85b521a6
+
+
+  # ElasticIp定義
+  StudyAwsElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: 52.197.179.237
+    DependsOn: StudyAwsEC2Instace
 
   # Subnet定義
   StudyAwsSubnetAZ1:
@@ -35,20 +52,21 @@ Resources:
   StudyAwsRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref StudyAwsVPC
+      VpcId: vpc-079bbf9eec33d99db
 
-  StudyAwsRouteLocal:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref StudyAwsRouteTable
-      DestinationCidrBlock: 10.0.0.0/24
+#  StudyAwsRouteLocal:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref StudyAwsRouteTable
+#      DestinationCidrBlock: 10.0.0.0/24
+#      GatewayId: !Ref StudyAwsInternetGateway
 
   StudyAwsRouteInternet:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref StudyAwsRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref StudyAwsInternetGateway
+      GatewayId: igw-02244a0793e382085
 
   # SecurityGroup
   StudyAwsEc2SecurityGroup:
@@ -56,21 +74,58 @@ Resources:
     Properties:
       VpcId: !Ref StudyAwsVPC
       GroupDescription: This Security Group is for my studying of AWS
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 111.239.255.229/32
 
   StudyAwsRdsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref StudyAwsVPC
       GroupDescription: rds
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
 
-  # RDS定義
-  StudyAwsRds:
-    Type: AWS::RDS::DBInstance
-    Properties:
-      DBName: study-aws-lesson
-      Port: 3306
-      DBInstanceClass: db.t2.micro
-      AvailabilityZone: ap-northeast-1a
-      VPCSecurityGroups: !Ref StudyAwsRdsSecurityGroup
+#  # RDS定義
+#  StudyAwsRds:
+#    Type: AWS::RDS::DBInstance
+#    Properties:
+#      DBName: study-aws-lesson
+#      Port: 3306
+#      DBInstanceClass: db.t2.micro
+#      AvailabilityZone: ap-northeast-1a
+#      VPCSecurityGroups: !Ref StudyAwsRdsSecurityGroup
+#
+#
+#  StudyAwsRdsDBSecurityGroup:
+#    Type: AWS::RDS::DBSecurityGroup
+#    Properties:
+#      EC2VpcId: !Ref StudyAwsRdsSecurityGroup
+#      DBSecurityGroupIngress: !Ref StudyAwsEc2SecurityGroup
+#      GroupDescription: !Ref StudyAwsRdsSecurityGroup
+#
+#  StudyAwsRdsSubnetGroup:
+#    Type: AWS::RDS::DBSubnetGroup
+#    Properties:
+#      DBSubnetGroupDescription: This DBSubnet Group is for my studying of AWS
+#      SubnetIds:
+#        - subnet-08d52b8df09fa90d4
+#        - subnet-0ff614f12ab6cdb6e
+
+
+
 
 
